@@ -24,7 +24,7 @@ public class PresellOrderLine: Identifiable, ObservableObject {
     
     public var basePricesAndPromosOnQtyOrdered: Bool = false
     
-    public var unitSplitCaseCharge: MoneyWithoutCurrency = .zero
+    public private(set) var unitSplitCaseCharge: MoneyWithoutCurrency = .zero
     
     public var freeGoods: [LineFreeGoods] = []
     public var discounts: [LineDiscount] = []
@@ -35,7 +35,7 @@ public class PresellOrderLine: Identifiable, ObservableObject {
     public var qtyOrdered: Int
     public var unitPrice: MoneyWithoutCurrency?
     
-    public var unitDiscount: MoneyWithoutCurrency = .zero
+    public private(set) var unitDiscount: MoneyWithoutCurrency = .zero
     
     public var totalNet: MoneyWithoutCurrency? {
         qtyOrdered * unitNetAfterDiscount
@@ -61,7 +61,7 @@ extension PresellOrderLine: DCOrderLine {
     public var hasDeeperDiscount: Bool {
         potentialDiscounts.contains { $0.unitDiscount > unitDiscount }
     }
-
+    
     public var totalAfterSavings: MoneyWithoutCurrency {
         
         guard let unitPrice = unitPrice else {
@@ -77,7 +77,7 @@ extension PresellOrderLine: DCOrderLine {
         let totalSavings = self.totalSavings
         
         let totalAfterSavings = frontline + splitCaseCharge + totalCharges - totalCredits - totalSavings
-
+        
         return totalAfterSavings
     }
     
@@ -92,7 +92,7 @@ extension PresellOrderLine: DCOrderLine {
         let totalDiscountedOnNonFreeGoods = (qtyShipped - qtyFree) * unitDiscount
         
         let savings = valueOfFreeGoods + totalDiscountedOnNonFreeGoods
-
+        
         return savings
     }
     
@@ -104,7 +104,7 @@ extension PresellOrderLine: DCOrderLine {
             return freeGoods.map({ $0.qtyFree}).reduce(0, +)
         }
     }
-
+    
     public var unitCharge: MoneyWithoutCurrency {
         charges.map({ $0.amount }).reduce(.zero, +)
     }
@@ -132,6 +132,7 @@ extension PresellOrderLine: DCOrderLine {
         potentialDiscounts = []
         
         unitDiscount = .zero
+        unitSplitCaseCharge = .zero
     }
     
     public func addFreeGoods(promoSectionNid: Int, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
@@ -140,11 +141,19 @@ extension PresellOrderLine: DCOrderLine {
     
     public func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
         discounts.append(LineDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount))
+        
         unitDiscount = unitDiscount + unitDisc
     }
     
     public func addCharge(_ charge: LineItemCharge) {
         charges.append(charge)
+        
+        switch charge {
+        case .splitCaseCharge(let amount):
+            unitSplitCaseCharge += amount
+        default:
+            break
+        }
     }
     
     public func addCredit(_ credit: LineItemCredit) {

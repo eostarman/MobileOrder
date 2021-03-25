@@ -33,10 +33,6 @@ fileprivate extension PresellOrderLine {
         }
         
         let qtyNonFree = qtyOrdered - self.qtyFree
-        let nonFreeLine = getLine()
-        nonFreeLine.qtyOrdered = qtyNonFree
-        nonFreeLine.qtyShipped = qtyNonFree
-        nonFreeLine.unitPrice = unitPrice
         
         var unitCRV: MoneyWithoutCurrency = .zero
         var crvContainerTypeNid: Int? = nil
@@ -46,6 +42,20 @@ fileprivate extension PresellOrderLine {
         var kegDeposit: MoneyWithoutCurrency = .zero
         var bagCredit: MoneyWithoutCurrency = .zero
         var statePickupCredit: MoneyWithoutCurrency = .zero
+        
+        
+        var CMAOnNid: Int? = nil
+        var CTMOnNid: Int? = nil
+        var CCFOnNid: Int? = nil
+        var CMAOffNid: Int? = nil
+        var CTMOffNid: Int? = nil
+        var CCFOffNid: Int? = nil
+        var CMAOnAmt: MoneyWithoutCurrency = .zero
+        var CTMOnAmt: MoneyWithoutCurrency = .zero
+        var CCFOnAmt: MoneyWithoutCurrency = .zero
+        var CMAOffAmt: MoneyWithoutCurrency = .zero
+        var CTMOffAmt: MoneyWithoutCurrency = .zero
+        var CCFOffAmt: MoneyWithoutCurrency = .zero
         
         struct DiscountPair {
             let promoSectionNid: Int
@@ -86,7 +96,31 @@ fileprivate extension PresellOrderLine {
         }
         
         for discount in discounts {
-            discountPairs.append(DiscountPair(promoSectionNid: discount.promoSectionNid, discount: discount.unitDisc))
+            switch discount.promoPlan {
+            
+            case .CCFOffInvoice:
+                CCFOffNid = discount.promoSectionNid
+                CCFOffAmt = discount.unitDisc
+            case .CCFOnInvoice:
+                CCFOnNid = discount.promoSectionNid
+                CCFOnAmt = discount.unitDisc
+            case .CMAOffInvoice:
+                CMAOffNid = discount.promoSectionNid
+                CMAOffAmt = discount.unitDisc
+            case .CMAOnInvoice:
+                CMAOnNid = discount.promoSectionNid
+                CMAOnAmt = discount.unitDisc
+            case .CTMOffInvoice:
+                CTMOffNid = discount.promoSectionNid
+                CTMOffAmt = discount.unitDisc
+            case .CTMOnInvoice:
+                CTMOnNid = discount.promoSectionNid
+                CTMOnAmt = discount.unitDisc
+                
+            case .Default, .Stackable, .AdditionalFee, .OffInvoiceAccrual:
+                discountPairs.append(DiscountPair(promoSectionNid: discount.promoSectionNid, discount: discount.unitDisc))
+            }
+            
         }
         
         if discountPairs.isEmpty {
@@ -100,6 +134,7 @@ fileprivate extension PresellOrderLine {
             let line = getLine()
             line.qtyOrdered = qtyNonFree
             line.qtyShipped = qtyNonFree
+            line.unitPrice = unitPrice
             
             if firstDiscountPair.discount.isNonZero {
                 line.promo1Nid = firstDiscountPair.promoSectionNid
@@ -113,6 +148,19 @@ fileprivate extension PresellOrderLine {
             line.unitSplitCaseCharge = splitCaseCharge
             line.bagCredit = bagCredit
             line.statePickupCredit = statePickupCredit
+            
+            line.CMAOnNid = CMAOnNid
+            line.CTMOnNid = CTMOnNid
+            line.CCFOnNid = CCFOnNid
+            line.CMAOffNid = CMAOffNid
+            line.CTMOffNid = CTMOffNid
+            line.CCFOffNid = CCFOffNid
+            line.CMAOnAmt = CMAOnAmt
+            line.CTMOnAmt = CTMOnAmt
+            line.CCFOnAmt = CCFOnAmt
+            line.CMAOffAmt = CMAOffAmt
+            line.CTMOffAmt = CTMOffAmt
+            line.CCFOffAmt = CCFOffAmt
             
             mobileOrderLines.append(line)
         }

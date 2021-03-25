@@ -15,16 +15,17 @@ let package = Package(
     dependencies: [
         .package(path: "../MoneyAndExchangeRates"),
         .package(path: "../MobileLegacyOrder"),
-        .package(path: "../MobileDownload")
+        .package(path: "../MobileDownload"),
+        .package(path: "../MobilePricing")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "MobileOrder",
-            dependencies: ["MoneyAndExchangeRates", "MobileLegacyOrder", "MobileDownload"]),
+            dependencies: ["MoneyAndExchangeRates", "MobileLegacyOrder", "MobileDownload", "MobilePricing"]),
         .testTarget(
             name: "MobileOrderTests",
-            dependencies: ["MobileOrder", "MoneyAndExchangeRates", "MobileLegacyOrder", "MobileDownload"]),
+            dependencies: ["MobileOrder", "MoneyAndExchangeRates", "MobileLegacyOrder", "MobileDownload", "MobilePricing"]),
     ]
 )
