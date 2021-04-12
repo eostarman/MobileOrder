@@ -79,6 +79,7 @@ extension PresellOrder {
             computePrices(filteredLines: filteredLines)
             unusedFreebies = computeDiscounts(filteredLines: filteredLines)
             computeSplitCaseCharges(filteredLines: filteredLines)
+            computeDeposits(filteredLines: filteredLines)
         }
         
         totalAfterSavings = lines.reduce(MoneyWithoutCurrency.zero) { $0 + $1.totalAfterSavings }.withCurrency(transactionCurrency)
@@ -122,6 +123,15 @@ extension PresellOrder {
     
     private func computeSplitCaseCharges(filteredLines: [PresellOrderLine]) {
         SplitCaseChargeService.computeSplitCaseCharges(deliveryDate: deliveryDate, transactionCurrency: transactionCurrency, orderLines: filteredLines)
+    }
+    
+    private func computeDeposits(filteredLines: [PresellOrderLine]) {
+        let shipFrom = mobileDownload.warehouses[shipFromWhseNid]
+        let sellTo = mobileDownload.customers[cusNid]
+        
+        let depositService = DepositService(shipFrom: shipFrom, sellTo: sellTo, pricingDate: promoDate, transactionCurrency: transactionCurrency, numberOfDecimals: numberOfDecimals)
+        
+        depositService.applyDeposits(orderLines: filteredLines)
     }
 }
 
