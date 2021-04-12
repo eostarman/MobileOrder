@@ -129,6 +129,7 @@ extension PresellOrder {
 extension PresellOrder {
     
     public enum CreationFilter {
+        case officeList
         case allHistory
         case allItems
     }
@@ -154,7 +155,7 @@ extension PresellOrder {
         let shipFromWhseNid = customer.whseNid
         let deliveryDate = PresellOrderService.getSoonestDeliveryDate()
         
-        let orderLines = getOrderLines(whseNid: shipFromWhseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, creationFilter: .allHistory)
+        let orderLines = getOrderLines(whseNid: shipFromWhseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, creationFilter: .officeList)
       
         let newOrder = PresellOrder(shipFromWhseNid: shipFromWhseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, lines: orderLines)
 
@@ -172,20 +173,31 @@ extension PresellOrder {
     }
     
     public static func getOrderLines(whseNid: Int, cusNid: Int, deliveryDate: Date, creationFilter: CreationFilter) -> [PresellOrderLine] {
-        let items: [ItemRecord]
+        var items: [ItemRecord]
         
         switch creationFilter {
+        case .officeList:
+            let officeListService = OfficeListService(cusNid: cusNid)
+            items = officeListService.itemNids.map { mobileDownload.items[$0] }            
         case .allHistory:
-            items = getItemsFromAllHistory(cusNid: cusNid).sorted(by: { $0.recName < $1.recName })
+            items = getItemsFromAllHistory(cusNid: cusNid)
         case .allItems:
-            items = mobileDownload.items.getAll().filter({ $0.activeFlag && $0.canSell }).sorted(by: { $0.recName < $1.recName })
+            items = mobileDownload.items.getAll().filter({ $0.activeFlag && $0.canSell })
         }
+        
+        items = items.sorted(by: { $0.recName < $1.recName })
         
         let authorizedItemsService = AuthorizedItemsService(fromWhseNid: whseNid, cusNid: cusNid, shipDate: deliveryDate)
         
         let authorizedItems = items.filter { authorizedItemsService.isAuthorized(itemNid: $0.recNid) }
+        
+        let employeeCanSellService = EmployeeCanSellService(customer: mobileDownload.customers[cusNid])
+        
+        let sellableItems = authorizedItems.filter(employeeCanSellService.employeeCanAndShouldSellItemToCustomer)
    
-        return authorizedItems.map { item in  PresellOrderLine(itemNid: item.recNid, itemName: item.recName, packName: item.packName, qtyOrdered: 0) }
+        let lines = sellableItems.map { item in  PresellOrderLine(itemNid: item.recNid, itemName: item.recName, packName: item.packName, qtyOrdered: 0) }
+        
+        return lines
     }
     
     private static func getItemsFromAllHistory(cusNid: Int) -> [ItemRecord] {
