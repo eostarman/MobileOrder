@@ -8,7 +8,7 @@ import MobileDownload
 import MoneyAndExchangeRates
 
 struct OrderConverter {
-    static func getLegacyOrder(_ order: PresellOrder) -> LegacyOrder {
+    static func getLegacyOrder(_ order: Order) -> LegacyOrder {
         
         let mobileOrder = LegacyOrder()
         
@@ -20,7 +20,7 @@ struct OrderConverter {
 
 fileprivate extension LegacyOrder {
     
-    func convertFromPresellOrder(order: PresellOrder) {
+    func convertFromPresellOrder(order: Order) {
 
         transactionCurrencyNid = order.transactionCurrency.currencyNid
         whseNid = order.shipFromWhseNid

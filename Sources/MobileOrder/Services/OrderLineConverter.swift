@@ -6,13 +6,13 @@ import MobileDownload
 import MoneyAndExchangeRates
 
 struct OrderLineConverter {
-    static func getLegacyOrderLines(_ line: PresellOrderLine) -> [LegacyOrderLine] {
+    static func getLegacyOrderLines(_ line: OrderLine) -> [LegacyOrderLine] {
         line.getLegacyOrderLines()
     }
 }
 
-fileprivate extension PresellOrderLine {
-    /// return one or more MobileOrderLine's for a single PresellOrderLine (accounting for things like free-goods, fees, taxes and additional discount lines
+fileprivate extension OrderLine {
+    /// return one or more LegacyOrderLine's for a single OrderLine (accounting for things like free-goods, fees, taxes and additional discount lines
     func getLegacyOrderLines() -> [LegacyOrderLine] {
         
         if itemNid == 0 {

@@ -14,19 +14,19 @@ import MoneyAndExchangeRates
 
 class OrderConverterTests: XCTestCase {
 
-    // note that the Legacy MobileOrderLine eschews nil values (unlike the PresellOrderLine)
+    // note that the Legacy MobileOrderLine eschews nil values (unlike the OrderLine)
     func testTheBasics() throws {
         
-        let line = PresellOrderLine(itemNid: 101, itemName: "", packName: "", qtyOrdered: 100)
+        let line = OrderLine(itemNid: 101, itemName: "", packName: "", qtyOrdered: 100)
         line.unitPrice = 1.23
         
-        let order = PresellOrder(shipFromWhseNid: 1, cusNid: 2, deliveryDate: "2020-12-26", lines: [line])
+        let order = Order(shipFromWhseNid: 1, cusNid: 2, deliveryDate: "2020-12-26", lines: [line])
         
         order.transactionCurrency = Currency.USD
         //order.promoDate = "2020-12-25"
         order.deliveryNote = "Check with Mike"
         
-        let legacyOrder = OrderConverter.getMobileOrder(order)
+        let legacyOrder = OrderConverter.getLegacyOrder(order)
         
         XCTAssertEqual(legacyOrder.transactionCurrencyNid, order.transactionCurrency.currencyNid)
         XCTAssertEqual(legacyOrder.whseNid, order.shipFromWhseNid)

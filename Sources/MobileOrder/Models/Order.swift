@@ -1,5 +1,5 @@
 //
-//  PresellOrder.swift
+//  Order.swift
 //  MobileBench
 //
 //  Created by Michael Rutherford on 7/26/20.
@@ -12,7 +12,7 @@ import MobileDownload
 import MoneyAndExchangeRates
 import MobilePricing
 
-public class PresellOrder: Identifiable, ObservableObject {
+public class Order: Identifiable, ObservableObject {
     public let id = UUID()
 
     public let shipFromWhseNid: Int
@@ -26,7 +26,7 @@ public class PresellOrder: Identifiable, ObservableObject {
 
     public var entrySequenceForCustomer: Int = 1
 
-    @Published public var lines: [PresellOrderLine] = []
+    @Published public var lines: [OrderLine] = []
 
     @Published public var totalAfterSavings: Money = Currency.USD.zero
     @Published public var totalSavings: Money = Currency.USD.zero
@@ -38,7 +38,7 @@ public class PresellOrder: Identifiable, ObservableObject {
     
     public var unusedFreebies: [UnusedFreebie] = []
 
-    public init(shipFromWhseNid: Int, cusNid: Int, deliveryDate: Date, lines: [PresellOrderLine]) {
+    public init(shipFromWhseNid: Int, cusNid: Int, deliveryDate: Date, lines: [OrderLine]) {
         self.shipFromWhseNid = shipFromWhseNid
         self.cusNid = cusNid
         self.deliveryDate = deliveryDate
@@ -51,7 +51,7 @@ public class PresellOrder: Identifiable, ObservableObject {
     }
 
     // for previews
-    public init(lines: [PresellOrderLine]) {
+    public init(lines: [OrderLine]) {
         shipFromWhseNid = 0
         cusNid = 0
         deliveryDate = Date()
@@ -65,7 +65,7 @@ public class PresellOrder: Identifiable, ObservableObject {
 }
 
 // calculations on the order
-extension PresellOrder {
+extension Order {
 
     public func recompute() {
         
@@ -97,7 +97,7 @@ extension PresellOrder {
         return total.withCurrency(transactionCurrency)
     }
 
-    private func computePrices(filteredLines: [PresellOrderLine]) {
+    private func computePrices(filteredLines: [OrderLine]) {
         
         let shipFrom = mobileDownload.warehouses[shipFromWhseNid]
         let sellTo = mobileDownload.customers[cusNid]
@@ -110,7 +110,7 @@ extension PresellOrder {
         }
     }
     
-    private func computeDiscounts(filteredLines: [PresellOrderLine]) -> [UnusedFreebie] {
+    private func computeDiscounts(filteredLines: [OrderLine]) -> [UnusedFreebie] {
         
         let promoSections = PromoService.getPromoSectionRecords(cusNid: cusNid, promoDate: promoDate, deliveryDate: deliveryDate)
         
@@ -121,11 +121,11 @@ extension PresellOrder {
         return promoSolution.unusedFreebies
     }
     
-    private func computeSplitCaseCharges(filteredLines: [PresellOrderLine]) {
+    private func computeSplitCaseCharges(filteredLines: [OrderLine]) {
         SplitCaseChargeService.computeSplitCaseCharges(deliveryDate: deliveryDate, transactionCurrency: transactionCurrency, orderLines: filteredLines)
     }
     
-    private func computeDeposits(filteredLines: [PresellOrderLine]) {
+    private func computeDeposits(filteredLines: [OrderLine]) {
         let shipFrom = mobileDownload.warehouses[shipFromWhseNid]
         let sellTo = mobileDownload.customers[cusNid]
         
@@ -136,7 +136,7 @@ extension PresellOrder {
 }
 
 // populate order lines based on history
-extension PresellOrder {
+extension Order {
     
     public enum CreationFilter {
         case officeList
@@ -150,7 +150,7 @@ extension PresellOrder {
         case potentialDiscounts
     }
     
-    public func getFilteredOrderLines(filter: OrderLineFilter) -> [PresellOrderLine] {
+    public func getFilteredOrderLines(filter: OrderLineFilter) -> [OrderLine] {
         switch filter {
         case .discounts:
             return lines.filter { !$0.discounts.isEmpty }
@@ -161,13 +161,13 @@ extension PresellOrder {
         }
     }
     
-    public static func createNewOrder(customer: CustomerRecord) -> PresellOrder {
+    public static func createNewOrder(customer: CustomerRecord) -> Order {
         let shipFromWhseNid = customer.whseNid
         let deliveryDate = PresellOrderService.getSoonestDeliveryDate()
         
         let orderLines = getOrderLines(whseNid: shipFromWhseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, creationFilter: .officeList)
       
-        let newOrder = PresellOrder(shipFromWhseNid: shipFromWhseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, lines: orderLines)
+        let newOrder = Order(shipFromWhseNid: shipFromWhseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, lines: orderLines)
 
         return newOrder
     }
@@ -182,7 +182,7 @@ extension PresellOrder {
         recompute()
     }
     
-    public static func getOrderLines(whseNid: Int, cusNid: Int, deliveryDate: Date, creationFilter: CreationFilter) -> [PresellOrderLine] {
+    public static func getOrderLines(whseNid: Int, cusNid: Int, deliveryDate: Date, creationFilter: CreationFilter) -> [OrderLine] {
         var items: [ItemRecord]
         
         switch creationFilter {
@@ -205,7 +205,7 @@ extension PresellOrder {
         
         let sellableItems = authorizedItems.filter(employeeCanSellService.employeeCanAndShouldSellItemToCustomer)
    
-        let lines = sellableItems.map { item in  PresellOrderLine(itemNid: item.recNid, itemName: item.recName, packName: item.packName, qtyOrdered: 0) }
+        let lines = sellableItems.map { item in  OrderLine(itemNid: item.recNid, itemName: item.recName, packName: item.packName, qtyOrdered: 0) }
         
         return lines
     }

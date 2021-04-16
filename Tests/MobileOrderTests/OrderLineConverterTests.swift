@@ -15,14 +15,14 @@ class OrderLineConverterTests: XCTestCase {
     
     func testTheBasics() throws {
         
-        let line = PresellOrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 100)
+        let line = OrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 100)
         line.unitPrice = 1.23
         line.isPreferredFreeGoodLine = true
         line.basePricesAndPromosOnQtyOrdered = true
         
         line.addCharge(.splitCaseCharge(amount: 0.19))
         
-        let legacyLines = OrderLineConverter.getMobileOrderLines(line)
+        let legacyLines = OrderLineConverter.getLegacyOrderLines(line)
         
         XCTAssertEqual(legacyLines.count, 1)
         
@@ -38,13 +38,13 @@ class OrderLineConverterTests: XCTestCase {
     
     func testOneDiscount() throws {
         
-        let line = PresellOrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 100)
+        let line = OrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 100)
         line.unitPrice = 1.23
         line.addDiscount(promoPlan: .CCFOnInvoice, promoSectionNid: 11, unitDisc: 0.15, rebateAmount: .zero)
         line.addDiscount(promoPlan: .CMAOnInvoice, promoSectionNid: 12, unitDisc: 0.16, rebateAmount: .zero)
         line.addDiscount(promoPlan: .CTMOnInvoice, promoSectionNid: 13, unitDisc: 0.17, rebateAmount: .zero)
         
-        let legacyLines = OrderLineConverter.getMobileOrderLines(line)
+        let legacyLines = OrderLineConverter.getLegacyOrderLines(line)
         
         XCTAssertEqual(legacyLines.count, 1)
         
@@ -63,13 +63,13 @@ class OrderLineConverterTests: XCTestCase {
     
     func testMultipleDiscounts() throws {
         
-        let line = PresellOrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 100)
+        let line = OrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 100)
         line.unitPrice = 1.23
         line.addDiscount(promoPlan: .Default, promoSectionNid: 11, unitDisc: 0.15, rebateAmount: .zero)
         line.addDiscount(promoPlan: .Stackable, promoSectionNid: 12, unitDisc: 0.16, rebateAmount: .zero)
         line.addDiscount(promoPlan: .Stackable, promoSectionNid: 13, unitDisc: 0.17, rebateAmount: .zero)
         
-        let legacyLines = OrderLineConverter.getMobileOrderLines(line)
+        let legacyLines = OrderLineConverter.getLegacyOrderLines(line)
         
         // one line with a price and a discount, then two "discount-only" lines
         XCTAssertEqual(legacyLines.count, 3)
@@ -107,7 +107,7 @@ class OrderLineConverterTests: XCTestCase {
     
     func testFreeGoodsMultipleDiscounts() throws {
         
-        let line = PresellOrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 120)
+        let line = OrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 120)
         line.unitPrice = 1.23
         line.addDiscount(promoPlan: .Default, promoSectionNid: 11, unitDisc: 0.15, rebateAmount: .zero)
         line.addDiscount(promoPlan: .Stackable, promoSectionNid: 12, unitDisc: 0.16, rebateAmount: .zero)
@@ -118,7 +118,7 @@ class OrderLineConverterTests: XCTestCase {
         
         line.addFreeGoods(promoSectionNid: 77, qtyFree: 20, rebateAmount: .zero)
         
-        let legacyLines = OrderLineConverter.getMobileOrderLines(line)
+        let legacyLines = OrderLineConverter.getLegacyOrderLines(line)
         
         // one line with a price and a discount, then two "discount-only" lines, then the free-goods line for the 20 free
         XCTAssertEqual(legacyLines.count, 4)

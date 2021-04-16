@@ -1,5 +1,5 @@
 //
-//  PresellOrderLine.swift
+//  OrderLine.swift
 //  MobileBench
 //
 //  Created by Michael Rutherford on 7/26/20.
@@ -10,7 +10,7 @@ import MoneyAndExchangeRates
 import MobilePricing
 import MobileDownload
 
-public class PresellOrderLine: Identifiable, ObservableObject {
+public class OrderLine: Identifiable, ObservableObject {
     // note that I'm not publishing individual properties - so, a view should observe the orderLine itself. The objectWillChange is fired when the order is recomputed (this recomputes all of its order lines). So, changing a quantity in one order line could change the price or discounts in some different order lines
     public let id = UUID()
     
@@ -49,7 +49,7 @@ public class PresellOrderLine: Identifiable, ObservableObject {
     }
 }
 
-extension PresellOrderLine: DCOrderLine {
+extension OrderLine: DCOrderLine {
     public var qtyDiscounted: Int {
         discounts.isEmpty ? 0 : qtyShipped - qtyFree
     }
@@ -165,7 +165,7 @@ extension PresellOrderLine: DCOrderLine {
     }
 }
 
-extension PresellOrderLine {
+extension OrderLine {
     
     public struct LineFreeGoods {
         let promoSectionNid: Int
