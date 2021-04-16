@@ -8,9 +8,9 @@ import MobileDownload
 import MoneyAndExchangeRates
 
 struct OrderConverter {
-    static func getMobileOrder(_ order: PresellOrder) -> MobileOrder {
+    static func getLegacyOrder(_ order: PresellOrder) -> LegacyOrder {
         
-        let mobileOrder = MobileOrder()
+        let mobileOrder = LegacyOrder()
         
         mobileOrder.convertFromPresellOrder(order: order)
         
@@ -18,7 +18,7 @@ struct OrderConverter {
     }
 }
 
-fileprivate extension MobileOrder {
+fileprivate extension LegacyOrder {
     
     func convertFromPresellOrder(order: PresellOrder) {
 
@@ -28,7 +28,7 @@ fileprivate extension MobileOrder {
         promoDate = order.promoDate
         shippedDate = order.deliveryDate
         invoiceNote = order.deliveryNote
-        lines = order.lines.flatMap { line in OrderLineConverter.getMobileOrderLines(line) }
+        lines = order.lines.flatMap { line in OrderLineConverter.getLegacyOrderLines(line) }
         
         companyNid = 1
         orderType = .FreshPresellOrder

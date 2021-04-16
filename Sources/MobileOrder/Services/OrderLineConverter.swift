@@ -6,26 +6,26 @@ import MobileDownload
 import MoneyAndExchangeRates
 
 struct OrderLineConverter {
-    static func getMobileOrderLines(_ line: PresellOrderLine) -> [MobileOrderLine] {
-        line.getMobileOrderLines()
+    static func getLegacyOrderLines(_ line: PresellOrderLine) -> [LegacyOrderLine] {
+        line.getLegacyOrderLines()
     }
 }
 
 fileprivate extension PresellOrderLine {
     /// return one or more MobileOrderLine's for a single PresellOrderLine (accounting for things like free-goods, fees, taxes and additional discount lines
-    func getMobileOrderLines() -> [MobileOrderLine] {
+    func getLegacyOrderLines() -> [LegacyOrderLine] {
         
         if itemNid == 0 {
-            let noteLine = MobileOrderLine()
+            let noteLine = LegacyOrderLine()
             noteLine.itemNameOverride = ""
             return [noteLine]
         }
         
-        var mobileOrderLines: [MobileOrderLine] = []
+        var mobileOrderLines: [LegacyOrderLine] = []
         let unitPrice = self.unitPrice ?? .zero
         
-        func getLine() -> MobileOrderLine {
-            let line = MobileOrderLine()
+        func getLine() -> LegacyOrderLine {
+            let line = LegacyOrderLine()
             line.itemNid = itemNid
             line.basePricesAndPromosOnQtyOrdered = basePricesAndPromosOnQtyOrdered
             line.isPreferredFreeGoodLine = isPreferredFreeGoodLine
