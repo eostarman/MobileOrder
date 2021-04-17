@@ -12,7 +12,7 @@ import MobileLegacyOrder
 import MobileOrder
 import MoneyAndExchangeRates
 
-class OrderConverterTests: XCTestCase {
+class OrderToLegacyOrderServiceTests: XCTestCase {
 
     // note that the Legacy MobileOrderLine eschews nil values (unlike the OrderLine)
     func testTheBasics() throws {
@@ -26,7 +26,7 @@ class OrderConverterTests: XCTestCase {
         //order.promoDate = "2020-12-25"
         order.deliveryNote = "Check with Mike"
         
-        let legacyOrder = OrderConverter.getLegacyOrder(order)
+        let legacyOrder = OrderToLegacyOrderService.getLegacyOrder(order)
         
         XCTAssertEqual(legacyOrder.transactionCurrencyNid, order.transactionCurrency.currencyNid)
         XCTAssertEqual(legacyOrder.whseNid, order.shipFromWhseNid)

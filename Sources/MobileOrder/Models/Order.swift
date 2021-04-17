@@ -14,6 +14,8 @@ import MobilePricing
 
 public class Order: Identifiable, ObservableObject {
     public let id = UUID()
+    
+    public var orderedDate: Date = Date()
 
     public let shipFromWhseNid: Int
     public let cusNid: Int

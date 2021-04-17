@@ -33,6 +33,10 @@ public class OrderLine: Identifiable, ObservableObject {
     public var potentialDiscounts: [PotentialDiscount] = []
     
     public var qtyOrdered: Int
+    public var qtyShipped: Int?
+    public var qtyShippedOrExpectedToBeShipped: Int {
+        qtyShipped ?? qtyOrdered
+    }
     public var unitPrice: MoneyWithoutCurrency?
     
     public private(set) var unitDiscount: MoneyWithoutCurrency = .zero
@@ -51,13 +55,9 @@ public class OrderLine: Identifiable, ObservableObject {
 
 extension OrderLine: DCOrderLine {
     public var qtyDiscounted: Int {
-        discounts.isEmpty ? 0 : qtyShipped - qtyFree
+        discounts.isEmpty ? 0 : qtyShippedOrExpectedToBeShipped - qtyFree
     }
-    
-    public var qtyShipped: Int {
-        qtyOrdered
-    }
-    
+
     public var hasDeeperDiscount: Bool {
         potentialDiscounts.contains { $0.unitDiscount > unitDiscount }
     }
@@ -68,11 +68,11 @@ extension OrderLine: DCOrderLine {
             return .zero
         }
         
-        let totalCharges = qtyShipped * unitCharge
-        let totalCredits = qtyShipped * unitCredit
+        let totalCharges = qtyShippedOrExpectedToBeShipped * unitCharge
+        let totalCredits = qtyShippedOrExpectedToBeShipped * unitCredit
         
-        let frontline = qtyShipped * unitPrice
-        let splitCaseCharge = (qtyShipped - qtyFree) * unitSplitCaseCharge // the split-case charge is for the non-free items
+        let frontline = qtyShippedOrExpectedToBeShipped * unitPrice
+        let splitCaseCharge = (qtyShippedOrExpectedToBeShipped - qtyFree) * unitSplitCaseCharge // the split-case charge is for the non-free items
         
         let totalSavings = self.totalSavings
         
@@ -89,7 +89,7 @@ extension OrderLine: DCOrderLine {
         
         let valueOfFreeGoods = qtyFree * unitPrice
         
-        let totalDiscountedOnNonFreeGoods = (qtyShipped - qtyFree) * unitDiscount
+        let totalDiscountedOnNonFreeGoods = (qtyShippedOrExpectedToBeShipped - qtyFree) * unitDiscount
         
         let savings = valueOfFreeGoods + totalDiscountedOnNonFreeGoods
         
@@ -99,7 +99,7 @@ extension OrderLine: DCOrderLine {
     /// The number of free goods. If the unitPrice (the frontlinePrice) is fully discounted (i.e. matches unitDiscount) then each one of the qtyShipped is free
     public var qtyFree: Int {
         if unitPrice == unitDiscount {
-            return qtyShipped
+            return qtyShippedOrExpectedToBeShipped
         } else {
             return freeGoods.map({ $0.qtyFree}).reduce(0, +)
         }
@@ -135,11 +135,11 @@ extension OrderLine: DCOrderLine {
         unitSplitCaseCharge = .zero
     }
     
-    public func addFreeGoods(promoSectionNid: Int, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
+    public func addFreeGoods(promoSectionNid: Int?, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
         freeGoods.append(LineFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree, rebateAmount: rebateAmount))
     }
     
-    public func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
+    public func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int?, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
         discounts.append(LineDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount))
         
         unitDiscount = unitDiscount + unitDisc
@@ -168,14 +168,14 @@ extension OrderLine: DCOrderLine {
 extension OrderLine {
     
     public struct LineFreeGoods {
-        let promoSectionNid: Int
+        let promoSectionNid: Int?
         let qtyFree: Int
         let rebateAmount: MoneyWithoutCurrency
     }
     
     public struct LineDiscount {
         let promoPlan: ePromoPlan
-        let promoSectionNid: Int
+        let promoSectionNid: Int?
         let unitDisc: MoneyWithoutCurrency
         let rebateAmount: MoneyWithoutCurrency
     }

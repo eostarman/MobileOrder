@@ -5,7 +5,7 @@ import MobileLegacyOrder
 import MobileDownload
 import MoneyAndExchangeRates
 
-struct OrderLineConverter {
+struct OrderLineToLegacyOrderLineService {
     static func getLegacyOrderLines(_ line: OrderLine) -> [LegacyOrderLine] {
         line.getLegacyOrderLines()
     }
@@ -24,7 +24,7 @@ fileprivate extension OrderLine {
         var mobileOrderLines: [LegacyOrderLine] = []
         let unitPrice = self.unitPrice ?? .zero
         
-        func getLine() -> LegacyOrderLine {
+        func getLegacyOrderLine() -> LegacyOrderLine {
             let line = LegacyOrderLine()
             line.itemNid = itemNid
             line.basePricesAndPromosOnQtyOrdered = basePricesAndPromosOnQtyOrdered
@@ -58,7 +58,7 @@ fileprivate extension OrderLine {
         var CCFOffAmt: MoneyWithoutCurrency = .zero
         
         struct DiscountPair {
-            let promoSectionNid: Int
+            let promoSectionNid: Int?
             let discount: MoneyWithoutCurrency
         }
         
@@ -131,7 +131,7 @@ fileprivate extension OrderLine {
         if let firstDiscountPair = discountPairs.first {
             discountPairs.removeFirst()
             
-            let line = getLine()
+            let line = getLegacyOrderLine()
             line.qtyOrdered = qtyNonFree
             line.qtyShipped = qtyNonFree
             line.unitPrice = unitPrice
@@ -167,7 +167,7 @@ fileprivate extension OrderLine {
         
         // additional "discount only" lines
         for discountPair in discountPairs {
-            let line = getLine()
+            let line = getLegacyOrderLine()
             line.qtyOrdered = qtyNonFree
             line.qtyShipped = qtyNonFree
    
@@ -182,7 +182,7 @@ fileprivate extension OrderLine {
         
         // additional free-goods lines
         for freeGood in freeGoods {
-            let line = getLine()
+            let line = getLegacyOrderLine()
             line.promo1Nid = freeGood.promoSectionNid
             line.qtyOrdered = freeGood.qtyFree
             line.qtyShipped = freeGood.qtyFree

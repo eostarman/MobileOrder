@@ -7,20 +7,20 @@ import MobileLegacyOrder
 import MobileDownload
 import MoneyAndExchangeRates
 
-struct OrderConverter {
+struct OrderToLegacyOrderService {
     static func getLegacyOrder(_ order: Order) -> LegacyOrder {
         
-        let mobileOrder = LegacyOrder()
+        let legacyOrder = LegacyOrder()
         
-        mobileOrder.convertFromPresellOrder(order: order)
+        legacyOrder.convertFromOrder(order: order)
         
-        return mobileOrder
+        return legacyOrder
     }
 }
 
 fileprivate extension LegacyOrder {
     
-    func convertFromPresellOrder(order: Order) {
+    func convertFromOrder(order: Order) {
 
         transactionCurrencyNid = order.transactionCurrency.currencyNid
         whseNid = order.shipFromWhseNid
@@ -28,7 +28,7 @@ fileprivate extension LegacyOrder {
         promoDate = order.promoDate
         shippedDate = order.deliveryDate
         invoiceNote = order.deliveryNote
-        lines = order.lines.flatMap { line in OrderLineConverter.getLegacyOrderLines(line) }
+        lines = order.lines.flatMap { line in OrderLineToLegacyOrderLineService.getLegacyOrderLines(line) }
         
         companyNid = 1
         orderType = .FreshPresellOrder
@@ -82,7 +82,7 @@ fileprivate extension LegacyOrder {
         followupInvoiceByNid = nil
         loadedDate = nil
         loadedByNid = nil
-        orderedDate = nil
+        orderedDate = order.orderedDate
         orderedByNid = nil
         palletizedDate = nil
         palletizedByNid = nil

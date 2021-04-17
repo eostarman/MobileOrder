@@ -11,7 +11,7 @@ import MobileDownload
 import MobileLegacyOrder
 import MobileOrder
 
-class OrderLineConverterTests: XCTestCase {
+class OrderLineToLegacyOrderLineServiceTests: XCTestCase {
     
     func testTheBasics() throws {
         
@@ -22,7 +22,7 @@ class OrderLineConverterTests: XCTestCase {
         
         line.addCharge(.splitCaseCharge(amount: 0.19))
         
-        let legacyLines = OrderLineConverter.getLegacyOrderLines(line)
+        let legacyLines = OrderLineToLegacyOrderLineService.getLegacyOrderLines(line)
         
         XCTAssertEqual(legacyLines.count, 1)
         
@@ -44,7 +44,7 @@ class OrderLineConverterTests: XCTestCase {
         line.addDiscount(promoPlan: .CMAOnInvoice, promoSectionNid: 12, unitDisc: 0.16, rebateAmount: .zero)
         line.addDiscount(promoPlan: .CTMOnInvoice, promoSectionNid: 13, unitDisc: 0.17, rebateAmount: .zero)
         
-        let legacyLines = OrderLineConverter.getLegacyOrderLines(line)
+        let legacyLines = OrderLineToLegacyOrderLineService.getLegacyOrderLines(line)
         
         XCTAssertEqual(legacyLines.count, 1)
         
@@ -69,7 +69,7 @@ class OrderLineConverterTests: XCTestCase {
         line.addDiscount(promoPlan: .Stackable, promoSectionNid: 12, unitDisc: 0.16, rebateAmount: .zero)
         line.addDiscount(promoPlan: .Stackable, promoSectionNid: 13, unitDisc: 0.17, rebateAmount: .zero)
         
-        let legacyLines = OrderLineConverter.getLegacyOrderLines(line)
+        let legacyLines = OrderLineToLegacyOrderLineService.getLegacyOrderLines(line)
         
         // one line with a price and a discount, then two "discount-only" lines
         XCTAssertEqual(legacyLines.count, 3)
@@ -118,7 +118,7 @@ class OrderLineConverterTests: XCTestCase {
         
         line.addFreeGoods(promoSectionNid: 77, qtyFree: 20, rebateAmount: .zero)
         
-        let legacyLines = OrderLineConverter.getLegacyOrderLines(line)
+        let legacyLines = OrderLineToLegacyOrderLineService.getLegacyOrderLines(line)
         
         // one line with a price and a discount, then two "discount-only" lines, then the free-goods line for the 20 free
         XCTAssertEqual(legacyLines.count, 4)
