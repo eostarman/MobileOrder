@@ -19,7 +19,7 @@ public struct OrderCreator {
         let lines: [OrderLine] = []
         
         //let orderNumber = 1001 // mobileCache.getNextAvailableOrderNumber(temporaryOrderNumbersAreAcceptable: true)
-        let order =  Order(shipFromWhseNid: customer.whseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, lines: lines)
+        let order =  Order(orderNumber: nil, shipFromWhseNid: customer.whseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, lines: lines)
         
         //order.companyNid = 1
         //order.cusNid = customer.recNid

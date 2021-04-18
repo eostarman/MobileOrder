@@ -39,7 +39,26 @@ public class OrderLine: Identifiable, ObservableObject {
     }
     public var unitPrice: MoneyWithoutCurrency?
     
-    public private(set) var unitDiscount: MoneyWithoutCurrency = .zero
+    public var unitDiscount: MoneyWithoutCurrency {
+         discounts.reduce(.zero, { $0 + $1.unitDisc })
+    }
+    
+    public var unitCharge: MoneyWithoutCurrency {
+        charges.reduce(.zero, { $0 + $1.amount })
+    }
+    
+    public var unitCredit: MoneyWithoutCurrency {
+        credits.reduce(.zero, { $0 + $1.amount })
+    }
+    
+    public var netUnitPrice: MoneyWithoutCurrency? {
+        guard let unitPrice = unitPrice else {
+            return nil
+        }
+        
+        let net = unitPrice - unitDiscount + unitCharge - unitCredit
+        return net
+    }
     
     public var totalNet: MoneyWithoutCurrency? {
         qtyOrdered * unitNetAfterDiscount
@@ -104,17 +123,12 @@ extension OrderLine: DCOrderLine {
             return freeGoods.map({ $0.qtyFree}).reduce(0, +)
         }
     }
-    
-    public var unitCharge: MoneyWithoutCurrency {
-        charges.map({ $0.amount }).reduce(.zero, +)
-    }
-    
-    public var unitCredit: MoneyWithoutCurrency {
-        credits.map({ $0.amount }).reduce(.zero, +)
-    }
-    
+
     public var unitNetAfterDiscount: MoneyWithoutCurrency {
-        (unitPrice ?? .zero) - unitDiscount
+        if let unitPrice = unitPrice {
+            return unitPrice - unitDiscount
+        }
+        return .zero
     }
     
     public func getCokePromoTotal() -> MoneyWithoutCurrency {
@@ -131,7 +145,6 @@ extension OrderLine: DCOrderLine {
         credits = []
         potentialDiscounts = []
         
-        unitDiscount = .zero
         unitSplitCaseCharge = .zero
     }
     
@@ -141,8 +154,6 @@ extension OrderLine: DCOrderLine {
     
     public func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int?, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
         discounts.append(LineDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount))
-        
-        unitDiscount = unitDiscount + unitDisc
     }
     
     public func addCharge(_ charge: LineItemCharge) {

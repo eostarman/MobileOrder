@@ -17,6 +17,7 @@ public class Order: Identifiable, ObservableObject {
     
     public var orderedDate: Date = Date()
 
+    public let orderNumber: Int?
     public let shipFromWhseNid: Int
     public let cusNid: Int
     @Published public var transactionCurrency: Currency
@@ -27,6 +28,9 @@ public class Order: Identifiable, ObservableObject {
     }
 
     public var entrySequenceForCustomer: Int = 1
+    
+    public var companyNid: Int = 1
+    public var paymentTermsNid: Int?
 
     @Published public var lines: [OrderLine] = []
 
@@ -40,7 +44,8 @@ public class Order: Identifiable, ObservableObject {
     
     public var unusedFreebies: [UnusedFreebie] = []
 
-    public init(shipFromWhseNid: Int, cusNid: Int, deliveryDate: Date, lines: [OrderLine]) {
+    public init(orderNumber: Int?, shipFromWhseNid: Int, cusNid: Int, deliveryDate: Date, lines: [OrderLine]) {
+        self.orderNumber = orderNumber
         self.shipFromWhseNid = shipFromWhseNid
         self.cusNid = cusNid
         self.deliveryDate = deliveryDate
@@ -54,6 +59,7 @@ public class Order: Identifiable, ObservableObject {
 
     // for previews
     public init(lines: [OrderLine]) {
+        orderNumber = nil
         shipFromWhseNid = 0
         cusNid = 0
         deliveryDate = Date()
@@ -169,7 +175,7 @@ extension Order {
         
         let orderLines = getOrderLines(whseNid: shipFromWhseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, creationFilter: .officeList)
       
-        let newOrder = Order(shipFromWhseNid: shipFromWhseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, lines: orderLines)
+        let newOrder = Order(orderNumber: nil, shipFromWhseNid: shipFromWhseNid, cusNid: customer.recNid, deliveryDate: deliveryDate, lines: orderLines)
 
         return newOrder
     }

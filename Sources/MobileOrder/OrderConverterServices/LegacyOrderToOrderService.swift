@@ -16,7 +16,7 @@ public struct LegacyOrderToOrderService {
         
         let deliveryDate = legacyOrder.deliveredDate ?? legacyOrder.orderedDate
         
-        let order = Order(shipFromWhseNid: legacyOrder.whseNid, cusNid: legacyOrder.toCusNid, deliveryDate: deliveryDate, lines: [])
+        let order = Order(orderNumber: legacyOrder.orderNumber, shipFromWhseNid: legacyOrder.whseNid, cusNid: legacyOrder.toCusNid, deliveryDate: deliveryDate, lines: [])
         
         order.convertFromLegacyOrder(legacyOrder: legacyOrder)
         
@@ -162,7 +162,6 @@ fileprivate extension Order {
         // promoDate = legacyOrder.promoDate
         // invoiceNote = legacyOrder.deliveryNote
         // companyNid = legacyOrder.companyNid
-        // orderNumber = legacyOrder.orderNumber
         // trkNid = legacyOrder.trkNid
         // isFromDistributor = legacyOrder.isFromDistributor
         // isToDistributor = legacyOrder.isToDistributor
