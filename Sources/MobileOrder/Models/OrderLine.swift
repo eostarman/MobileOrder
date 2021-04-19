@@ -60,7 +60,7 @@ public class OrderLine: Identifiable, ObservableObject {
         return net
     }
     
-    public var totalNet: MoneyWithoutCurrency? {
+    public var totalNet: MoneyWithoutCurrency {
         qtyOrdered * unitNetAfterDiscount
     }
     
