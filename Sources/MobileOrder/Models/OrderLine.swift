@@ -179,26 +179,16 @@ extension OrderLine: DCOrderLine {
 extension OrderLine {
     
     public struct LineFreeGoods {
-        let promoSectionNid: Int?
-        let qtyFree: Int
-        let rebateAmount: MoneyWithoutCurrency
+        public let promoSectionNid: Int?
+        public let qtyFree: Int
+        public let rebateAmount: MoneyWithoutCurrency
     }
     
     public struct LineDiscount {
-        let promoPlan: ePromoPlan
-        let promoSectionNid: Int?
-        let unitDisc: MoneyWithoutCurrency
+        public let promoPlan: ePromoPlan
+        public let promoSectionNid: Int?
+        public let unitDisc: MoneyWithoutCurrency
         let rebateAmount: MoneyWithoutCurrency
-    }
-    
-    public struct LineTax {
-        let promoSectionNid: Int
-        let unitTax: MoneyWithoutCurrency
-    }
-    
-    public struct LineFee {
-        let promoSectionNid: Int
-        let unitFee: MoneyWithoutCurrency
     }
 }
 
