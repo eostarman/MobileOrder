@@ -12,20 +12,20 @@ import MoneyAndExchangeRates
 
 struct LegacyOrderLineToOrderLineService {
 
-    static func getOrderLines(orderNumber: Int, legacyOrderLines: [LegacyOrderLine]) -> [OrderLine] {
+    static func getOrderLines(legacyOrderLines: [LegacyOrderLine]) -> [OrderLine] {
         var lines: [OrderLine] = []
         var badLines: [LegacyOrderLine] = []
         
         for lol in legacyOrderLines {
             if lol.isDiscountOnly {
-                print("ERROR: Cannot convert from legacyOrder #\(orderNumber): found discount-only line")
+                print("ERROR: Cannot convert from legacyOrder: found discount-only line")
                 if let lastLine = lines.last {
                     badLines.append(lol)
                 } else {
                     badLines.append(lol)
                 }
             } else {
-                if let line = getOrderLine(orderNumber: orderNumber, legacyOrderLine: lol) {
+                if let line = getOrderLine(legacyOrderLine: lol) {
                     lines.append(line)
                 } else {
                     badLines.append(lol)
@@ -36,26 +36,26 @@ struct LegacyOrderLineToOrderLineService {
         return lines
     }
     
-    static func getOrderLine(orderNumber: Int, legacyOrderLine lol: LegacyOrderLine) -> OrderLine? {
+    static func getOrderLine(legacyOrderLine lol: LegacyOrderLine) -> OrderLine? {
         
         guard let itemNid = lol.itemNid else {
-            print("ERROR: Cannot convert from legacyOrder #\(orderNumber): found note line: '\(lol.itemNameOverride ?? "")'")
+            print("ERROR: Cannot convert from legacyOrder: found note line: '\(lol.itemNameOverride ?? "")'")
             return nil
         }
         
         let orderLine = OrderLine(itemNid: itemNid, itemName: "", packName: "", qtyOrdered: 0)
         
-        orderLine.convertFromLegacyOrderLine(orderNumber: orderNumber, legacyOrderLine: lol)
+        orderLine.convertFromLegacyOrderLine(legacyOrderLine: lol)
         
         return orderLine
     }
 }
 
 fileprivate extension OrderLine {
-    func convertFromLegacyOrderLine(orderNumber: Int, legacyOrderLine lol: LegacyOrderLine) {
+    func convertFromLegacyOrderLine(legacyOrderLine lol: LegacyOrderLine) {
         
         func error(_ message: String) {
-            print("ERROR: Cannot convert from legacyOrder #\(orderNumber): itemNid \(itemNid): \(message)")
+            print("ERROR: Cannot convert from legacyOrder: itemNid \(itemNid): \(message)")
         }
         
         if lol.itemWriteoffNid != nil { error("itemWriteoffNid = '\(lol.itemWriteoffNid!)'") }

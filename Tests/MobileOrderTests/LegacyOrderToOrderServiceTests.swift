@@ -15,8 +15,8 @@ class LegacyOrderToOrderServiceTests: XCTestCase {
     func testIncompleteConversionFromLegacyOrder() throws {
         let lol = LegacyOrder()
         
-        let seedValues = SeedValues(bool: true, int: 123, nullableInt: 22, money: 1.0, nullableString: "x", nullableDate: Date(), nullableMoney: nil, date: Date())
-        
+        let seedDate = Date.fromDownloadedDateTime("20200529:200545")! // don't use Date() since it'll have millisecs and we don't encode/decode millisecs
+        let seedValues = SeedValues(bool: true, int: 123, money: 1.0, date: seedDate, string: "xx", nullableInt: 22, nullableMoney: 1.99, nullableDate: Date(), nullableString: "x")
         lol.seed(seedValues)
         
         // this is what we're testing
@@ -24,9 +24,9 @@ class LegacyOrderToOrderServiceTests: XCTestCase {
             XCTFail("Conversion failed")
             return
         }
-        
+      
         let lol2 = OrderToLegacyOrderService.getLegacyOrder(order)
-        
+
         XCTAssertEqual(lol.transactionCurrencyNid, lol2.transactionCurrencyNid)
         XCTAssertEqual(lol.companyNid, lol2.companyNid)
         XCTAssertEqual(lol.orderNumber, lol2.orderNumber)
@@ -159,9 +159,9 @@ class LegacyOrderToOrderServiceTests: XCTestCase {
 fileprivate extension LegacyOrder {
     func seed(_ v: SeedValues) {
         
-        transactionCurrencyNid = v.nullableInt
+        transactionCurrencyNid = Currency.ZAR.currencyNid
         companyNid = v.int
-        orderNumber = v.int
+        orderNumber = v.nullableInt
         whseNid = v.int
         trkNid = v.nullableInt
         toCusNid = v.int
@@ -220,7 +220,7 @@ fileprivate extension LegacyOrder {
         palletizedByNid = v.nullableInt
         pickListDate = v.nullableDate
         pickListByNid = v.nullableInt
-        shippedDate = v.nullableDate
+        shippedDate = v.date
         shippedByNid = v.nullableInt
         stagedDate = v.nullableDate
         stagedByNid = v.nullableInt
@@ -256,7 +256,7 @@ fileprivate extension LegacyOrder {
         isEft = v.bool
         poNumber = v.nullableString
         takenFrom = v.nullableString
-        invoiceNote = v.nullableString
+        invoiceNote = v.nullableString ?? ""
         packNote = v.nullableString
         serializedItems = v.nullableString
         receivedBy = v.nullableString

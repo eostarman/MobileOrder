@@ -15,11 +15,11 @@ class LegacyOrderLineToOrderLineServiceTests: XCTestCase {
     func testIncompleteConversionFromLegacyOrderLine() throws {
         let lol = LegacyOrderLine()
         
-        let seedValues = SeedValues(bool: true, int: 123, nullableInt: 22, money: 1.0, nullableString: "x", nullableDate: Date(), nullableMoney: 5.67, date: Date())
-        
+        let seedDate = Date.fromDownloadedDateTime("20200529:200545")! // don't use Date() since it'll have millisecs and we don't encode/decode millisecs
+        let seedValues = SeedValues(bool: true, int: 123, money: 1.0, date: seedDate, string: "xx", nullableInt: 22, nullableMoney: 1.99, nullableDate: Date(), nullableString: "x")
         lol.seed(seedValues)
         
-        guard let line = LegacyOrderLineToOrderLineService.getOrderLine(orderNumber: 666, legacyOrderLine: lol) else {
+        guard let line = LegacyOrderLineToOrderLineService.getOrderLine(legacyOrderLine: lol) else {
             XCTFail("Conversion failed")
             return
         }
@@ -93,12 +93,14 @@ class LegacyOrderLineToOrderLineServiceTests: XCTestCase {
 struct SeedValues {
     let bool: Bool
     let int: Int
-    let nullableInt: Int?
     let money: MoneyWithoutCurrency
-    let nullableString: String?
-    let nullableDate: Date?
-    let nullableMoney: MoneyWithoutCurrency?
     let date: Date
+    let string: String
+    
+    let nullableInt: Int?
+    let nullableMoney: MoneyWithoutCurrency?
+    let nullableDate: Date?
+    let nullableString: String?
 }
 
 fileprivate extension LegacyOrderLine {

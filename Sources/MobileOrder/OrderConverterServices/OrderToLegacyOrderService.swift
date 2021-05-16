@@ -22,80 +22,72 @@ fileprivate extension LegacyOrder {
     
     func convertFromOrder(order: Order) {
 
+        orderNumber = order.orderNumber
         transactionCurrencyNid = order.transactionCurrency.currencyNid
         whseNid = order.shipFromWhseNid
         toCusNid = order.cusNid
-        promoDate = order.promoDate
+        promoDate = order.promoOverrideDate
         shippedDate = order.deliveryDate
         invoiceNote = order.deliveryNote
+        
+        companyNid = order.companyNid
+        trkNid = order.trkNid
+        drvEmpNid = order.drvEmpNid
+        slsEmpNid = order.slsEmpNid
+        orderTypeNid = order.orderTypeNid
+        orderType = order.orderType
+        
+        orderedDate = order.orderedDate
+
         lines = order.lines.flatMap { line in OrderLineToLegacyOrderLineService.getLegacyOrderLines(line) }
         
-        companyNid = 1
-        orderType = .FreshPresellOrder
+        applyLogEntriesToLegacyOrder(logEntries: order.logEntries)
         
-        orderNumber = 0
-        trkNid = nil
+        if let voidingEntry = order.voidingEntry {
+            isVoided = voidingEntry.isVoided // mpr: we're treating this as a "force-void" even if the other things are nil
+            voidedDate = voidingEntry.voidedDate
+            voidedByNid = voidingEntry.voidedByNid
+            voidReason = voidingEntry.voidReason
+            voidReasonNid = voidingEntry.voidReasonNid
+        }
+        
+        shipAdr1 = order.deliveryInfo.shipAdr1
+        shipAdr2 = order.deliveryInfo.shipAdr2
+        shipCity = order.deliveryInfo.shipCity
+        shipState = order.deliveryInfo.shipState
+        shipZip = order.deliveryInfo.shipZip
+        
+        loadNumber = order.deliveryRouteInfo.loadNumber
+        deliverySequence = order.deliveryRouteInfo.deliverySequence
+        isBulkOrder = order.deliveryRouteInfo.isBulkOrder
+        isOffScheduleDelivery = order.deliveryRouteInfo.isOffScheduleDelivery
+        
+        paymentTermsNid = order.paymentTermsInfo.paymentTermsNid
+        isCharge = order.paymentTermsInfo.isCharge
+        isEft = order.paymentTermsInfo.isEFT
+        termDiscountPct = order.paymentTermsInfo.termDiscountPct
+        termDiscountDays = order.paymentTermsInfo.termDiscountDays
+
         isFromDistributor = false
         isToDistributor = false
         deliveryChargeNid = nil
         isAutoDeliveryCharge = true
         isEarlyPay = false
         earlyPayDiscountAmt = nil
-        termDiscountDays = nil
-        termDiscountPct = nil
         heldStatus = false
-        isVoided = false
         deliveredStatus = false
         isHotShot = false
         numberSummarized = nil
         summaryOrderNumber = nil
         coopTicketNumber = nil
-        shipAdr1 = nil
-        shipAdr2 = nil
-        shipCity = nil
-        shipState = nil
-        shipZip = nil
+
         doNotChargeUnitFreight = false
         doNotChargeUnitDeliveryCharge = false
         ignoreDeliveryTruckRestrictions = false
         signatureVectors = nil
         driverSignatureVectors = nil
-        isOffScheduleDelivery = false
         isSpecialPaymentTerms = false
-        authenticatedByNid = nil
-        authenticatedDate = nil
-        deliveredDate = nil
-        deliveredByNid = nil
-        deliveryDocumentDate = nil
-        deliveryDocumentByNid = nil
-        dispatchedDate = nil
-        dispatchedByNid = nil
-        ediInvoiceDate = nil
-        ediInvoiceByNid = nil
-        ediPaymentDate = nil
-        ediPaymentByNid = nil
-        ediShipNoticeDate = nil
-        ediShipNoticeByNid = nil
-        enteredDate = nil
-        enteredByNid = nil
-        followupInvoiceDate = nil
-        followupInvoiceByNid = nil
-        loadedDate = nil
-        loadedByNid = nil
-        orderedDate = order.orderedDate
-        orderedByNid = nil
-        palletizedDate = nil
-        palletizedByNid = nil
-        pickListDate = nil
-        pickListByNid = nil
-        shippedByNid = nil
-        stagedDate = nil
-        stagedByNid = nil
-        verifiedDate = nil
-        verifiedByNid = nil
-        voidedDate = nil
-        voidedByNid = nil
-        loadNumber = nil
+
         toEquipNid = nil
         isVendingReplenishment = false
         replenishmentVendTicketNumber = nil
@@ -106,21 +98,13 @@ fileprivate extension LegacyOrder {
         POAAmount = nil
         POAExpected = nil
         includeChargeOrderInTotalDue = false
-        deliverySequence = nil
         orderDEXStatus = nil
         isForPlanogramReset = false
         manualHold = false
         pushOffDate = nil
-        drvEmpNid = nil
-        slsEmpNid = nil
-        orderTypeNid = nil
         isBillAndHold = false
-        paymentTermsNid = nil
-        isBulkOrder = false
-        isCharge = false
         isTaxable = false
         usedCombinedForm = false
-        isEft = false
         poNumber = nil
         takenFrom = nil
         packNote = nil
@@ -128,13 +112,11 @@ fileprivate extension LegacyOrder {
         receivedBy = nil
         pushOffReason = nil
         skipReason = nil
-        voidReason = nil
         offInvoiceDiscPct = nil
         discountAmt = nil
         totalFreight = nil
         isExistingOrder = false
         printedReviewInvoice = false
-        voidReasonNid = nil
         entryTime = nil
         deliveredByHandheld = false
         isOffTruck = false

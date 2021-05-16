@@ -20,7 +20,7 @@ class OrderToLegacyOrderServiceTests: XCTestCase {
         let line = OrderLine(itemNid: 101, itemName: "", packName: "", qtyOrdered: 100)
         line.unitPrice = 1.23
         
-        let order = Order(shipFromWhseNid: 1, cusNid: 2, deliveryDate: "2020-12-26", lines: [line])
+        let order = Order(orderNumber: 1001, shipFromWhseNid: 1, cusNid: 2, deliveryDate: "2020-12-26", lines: [line])
         
         order.transactionCurrency = Currency.USD
         //order.promoDate = "2020-12-25"

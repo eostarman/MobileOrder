@@ -11,26 +11,33 @@ import SwiftUI
 import MobileDownload
 import MoneyAndExchangeRates
 import MobilePricing
+import MobileLegacyOrder
 
 public class Order: Identifiable, ObservableObject {
     public let id = UUID()
     
     public var orderedDate: Date = Date()
 
-    public let orderNumber: Int?
-    public let shipFromWhseNid: Int
-    public let cusNid: Int
+    public var orderNumber: Int?
+    public var shipFromWhseNid: Int
+    public var cusNid: Int
+    public var companyNid: Int = 1
+    public var trkNid: Int?
+    public var drvEmpNid: Int?
+    public var slsEmpNid: Int?
+    public var orderTypeNid: Int?
+    public var orderType: eOrderType = .FreshPresellOrder
+    
     @Published public var transactionCurrency: Currency
     public let numberOfDecimals: Int
     
     var promoDate: Date {
-        mobileDownload.databaseSource == .live ? deliveryDate : mobileDownload.handheld.syncDate
+        mobileDownload.databaseSource == .live ? promoOverrideDate ?? deliveryDate : mobileDownload.handheld.syncDate
     }
-
-    public var entrySequenceForCustomer: Int = 1
     
-    public var companyNid: Int = 1
-    public var paymentTermsNid: Int?
+    public var entrySequenceForCustomer: Int = 1
+
+    public var conversionErrors: [String] = []
 
     @Published public var lines: [OrderLine] = []
 
@@ -42,7 +49,15 @@ public class Order: Identifiable, ObservableObject {
 
     @Published public var deliveryDate = Date()
     
+    public var promoOverrideDate: Date?
+    
     public var unusedFreebies: [UnusedFreebie] = []
+    
+    public var logEntries: [OrderLogEntry] = []
+    public var voidingEntry: OrderVoidingEntry?
+    public var deliveryInfo: OrderDeliveryInfo = .init()
+    public var deliveryRouteInfo: OrderDeliveryRouteInfo = .init()
+    public var paymentTermsInfo: OrderPaymentTermsInfo = .init()
 
     public init(orderNumber: Int?, shipFromWhseNid: Int, cusNid: Int, deliveryDate: Date, lines: [OrderLine]) {
         self.orderNumber = orderNumber
