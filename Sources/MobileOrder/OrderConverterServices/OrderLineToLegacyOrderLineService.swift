@@ -11,9 +11,9 @@ struct OrderLineToLegacyOrderLineService {
     }
 }
 
-fileprivate extension OrderLine {
+extension OrderLine {
     /// return one or more LegacyOrderLine's for a single OrderLine (accounting for things like free-goods, fees, taxes and additional discount lines
-    func getLegacyOrderLines() -> [LegacyOrderLine] {
+    public func getLegacyOrderLines() -> [LegacyOrderLine] {
         
         if itemNid == 0 {
             let noteLine = LegacyOrderLine()

@@ -7,8 +7,8 @@ import MobileLegacyOrder
 import MobileDownload
 import MoneyAndExchangeRates
 
-struct OrderToLegacyOrderService {
-    static func getLegacyOrder(_ order: Order) -> LegacyOrder {
+public struct OrderToLegacyOrderService {
+    public static func getLegacyOrder(_ order: Order) -> LegacyOrder {
         
         let legacyOrder = LegacyOrder()
         
