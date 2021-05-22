@@ -43,7 +43,7 @@ struct LegacyOrderLineToOrderLineService {
             return nil
         }
         
-        let orderLine = OrderLine(itemNid: itemNid, itemName: "", packName: "", qtyOrdered: 0)
+        let orderLine = OrderLine(itemNid: itemNid, qtyOrdered: 0)
         
         orderLine.convertFromLegacyOrderLine(legacyOrderLine: lol)
         

@@ -31,7 +31,7 @@ class OrderToLegacyOrderServiceTests: XCTestCase {
         XCTAssertEqual(legacyOrder.transactionCurrencyNid, order.transactionCurrency.currencyNid)
         XCTAssertEqual(legacyOrder.whseNid, order.shipFromWhseNid)
         XCTAssertEqual(legacyOrder.toCusNid, order.cusNid)
-        XCTAssertEqual(legacyOrder.promoDate, order.promoDate)
+        XCTAssertEqual(legacyOrder.promoDate, order.promoOverrideDate)
         XCTAssertEqual(legacyOrder.shippedDate, order.deliveryDate)
         XCTAssertEqual(legacyOrder.invoiceNote, order.deliveryNote)
         

@@ -30,7 +30,6 @@ class OrderLineToLegacyOrderLineServiceTests: XCTestCase {
             let legacy = legacyLines[0]
             XCTAssertEqual(legacy.itemNid, line.itemNid)
             XCTAssertEqual(legacy.unitPrice, line.unitPrice)
-            XCTAssertEqual(legacy.unitSplitCaseCharge, line.unitSplitCaseCharge)
             XCTAssertEqual(legacy.isPreferredFreeGoodLine, line.isPreferredFreeGoodLine)
             XCTAssertEqual(legacy.basePricesAndPromosOnQtyOrdered, line.basePricesAndPromosOnQtyOrdered)
         }

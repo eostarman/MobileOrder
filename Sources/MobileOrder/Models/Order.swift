@@ -228,7 +228,7 @@ extension Order {
         
         let sellableItems = authorizedItems.filter(employeeCanSellService.employeeCanAndShouldSellItemToCustomer)
    
-        let lines = sellableItems.map { item in  OrderLine(itemNid: item.recNid, itemName: item.recName, packName: item.packName, qtyOrdered: 0) }
+        let lines = sellableItems.map { item in  OrderLine(itemNid: item.recNid, qtyOrdered: 0) }
         
         return lines
     }

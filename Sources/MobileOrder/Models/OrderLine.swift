@@ -17,14 +17,10 @@ public class OrderLine: Identifiable, ObservableObject {
     public var seq: Int = 0
     
     public let itemNid: Int
-    public let itemName: String
-    public let packName: String
     
     public var isPreferredFreeGoodLine: Bool = false
     
     public var basePricesAndPromosOnQtyOrdered: Bool = false
-    
-    public private(set) var unitSplitCaseCharge: MoneyWithoutCurrency = .zero
     
     public var freeGoods: [LineFreeGoods] = []
     public var discounts: [LineDiscount] = []
@@ -32,7 +28,8 @@ public class OrderLine: Identifiable, ObservableObject {
     public var credits: [LineItemCredit] = []
     public var potentialDiscounts: [PotentialDiscount] = []
     
-    public var qtyOrdered: Int
+    @Published public var qtyOrdered: Int
+    
     public var qtyShipped: Int?
     public var qtyShippedOrExpectedToBeShipped: Int {
         qtyShipped ?? qtyOrdered
@@ -64,10 +61,8 @@ public class OrderLine: Identifiable, ObservableObject {
         qtyOrdered * unitNetAfterDiscount
     }
     
-    public init(itemNid: Int, itemName: String, packName: String, qtyOrdered: Int) {
+    public init(itemNid: Int, qtyOrdered: Int) {
         self.itemNid = itemNid
-        self.itemName = itemName
-        self.packName = packName
         self.qtyOrdered = qtyOrdered
     }
 }
@@ -91,11 +86,10 @@ extension OrderLine: DCOrderLine {
         let totalCredits = qtyShippedOrExpectedToBeShipped * unitCredit
         
         let frontline = qtyShippedOrExpectedToBeShipped * unitPrice
-        let splitCaseCharge = (qtyShippedOrExpectedToBeShipped - qtyFree) * unitSplitCaseCharge // the split-case charge is for the non-free items
         
         let totalSavings = self.totalSavings
         
-        let totalAfterSavings = frontline + splitCaseCharge + totalCharges - totalCredits - totalSavings
+        let totalAfterSavings = frontline + totalCharges - totalCredits - totalSavings
         
         return totalAfterSavings
     }
@@ -137,15 +131,13 @@ extension OrderLine: DCOrderLine {
     
     public func clearAllPromoData() {
         
-        objectWillChange.send() // so SwiftUI will re-render any views observing this orderLine
+        objectWillChange.send() // so SwiftUI will re-render any views observing this particular orderLine
         
         freeGoods = []
         discounts = []
         charges = []
         credits = []
         potentialDiscounts = []
-        
-        unitSplitCaseCharge = .zero
     }
     
     public func addFreeGoods(promoSectionNid: Int?, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
@@ -158,13 +150,6 @@ extension OrderLine: DCOrderLine {
     
     public func addCharge(_ charge: LineItemCharge) {
         charges.append(charge)
-        
-        switch charge {
-        case .splitCaseCharge(let amount):
-            unitSplitCaseCharge += amount
-        default:
-            break
-        }
     }
     
     public func addCredit(_ credit: LineItemCredit) {
