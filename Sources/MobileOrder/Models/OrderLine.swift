@@ -67,7 +67,7 @@ public class OrderLine: Identifiable, ObservableObject {
     }
 }
 
-extension OrderLine: DCOrderLine {
+extension OrderLine: DCOrderLine, SplitCaseChargeSource {
     public var qtyDiscounted: Int {
         discounts.isEmpty ? 0 : qtyShippedOrExpectedToBeShipped - qtyFree
     }
@@ -92,6 +92,18 @@ extension OrderLine: DCOrderLine {
         let totalAfterSavings = frontline + totalCharges - totalCredits - totalSavings
         
         return totalAfterSavings
+    }
+    
+    public var splitCaseCharge: MoneyWithoutCurrency? {
+        for charge in charges {
+            switch charge {
+            case .splitCaseCharge(let amount):
+                return amount
+            default:
+                break
+            }
+        }
+        return nil
     }
     
     /// value of the free goods plus any discounts on the non-free goods
