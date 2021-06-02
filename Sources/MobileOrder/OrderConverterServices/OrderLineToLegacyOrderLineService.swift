@@ -11,9 +11,9 @@ struct OrderLineToLegacyOrderLineService {
     }
 }
 
-extension OrderLine {
-    /// return one or more LegacyOrderLine's for a single OrderLine (accounting for things like free-goods, fees, taxes and additional discount lines
-    public func getLegacyOrderLines() -> [LegacyOrderLine] {
+fileprivate extension OrderLine {
+    /// return one or more LegacyOrderLine's for a single OrderLine (accounting for things like free-goods, fees, taxes and additional discount lines)
+    func getLegacyOrderLines() -> [LegacyOrderLine] {
         
         if itemNid == 0 {
             let noteLine = LegacyOrderLine()
@@ -162,6 +162,8 @@ extension OrderLine {
             line.CTMOffAmt = CTMOffAmt
             line.CCFOffAmt = CCFOffAmt
             
+            convertAdjustmentsAndQtyShipped(legacyOrderLine: line)
+            
             mobileOrderLines.append(line)
         }
         
@@ -170,7 +172,7 @@ extension OrderLine {
             let line = getLegacyOrderLine()
             line.qtyOrdered = qtyNonFree
             line.qtyShipped = qtyNonFree
-   
+            
             line.unitPrice = .zero
             line.unitDisc = discountPair.discount
             if discountPair.promoSectionNid != 0 {
@@ -194,6 +196,43 @@ extension OrderLine {
         }
         
         return mobileOrderLines
+    }
+    
+    func convertAdjustmentsAndQtyShipped(legacyOrderLine lol: LegacyOrderLine) {
+        
+        if adjustments.isEmpty {
+            lol.qtyShipped = lol.qtyOrdered
+            return
+        }
+        
+        for adjustment in adjustments {
+            switch adjustment.adjustmentType {
+            case .qtyLayerRoundingAdjustment:
+                lol.qtyLayerRoundingAdjustment = adjustment.qtyToAddOrCut
+                
+            case .adjustmentToMatchLegacyQtyShipped:
+                // when an order is voided, it may or may not have been processed by OTL. If it *was* cut by OTL, then OTL will have populated the reason for the cut.
+                if adjustment.reasonNid != nil {
+                    lol.wasAutoCut = true
+                }
+                break // this can safely be ignored - a legacy orderLine could have qtyOrdered=10 and qtyShipped=3 - and that's all
+            
+            case .qtyBackordered:
+                lol.qtyBackordered = -adjustment.qtyToAddOrCut
+            case .qtyDeliveryDriverAdjustment:
+                lol.qtyDeliveryDriverAdjustment = adjustment.qtyToAddOrCut
+            case .qtyShippedWhenVoided:
+                lol.qtyShippedWhenVoided = -adjustment.qtyToAddOrCut
+            }
+            
+            if let itemWriteoffNid = adjustment.reasonNid {
+                lol.itemWriteoffNid = itemWriteoffNid
+            }
+        }
+        
+        let netAddsOrCuts = adjustments.map({$0.qtyToAddOrCut}).reduce(0, {$0 + $1})
+        
+        lol.qtyShipped = lol.qtyOrdered + netAddsOrCuts
     }
     
 }

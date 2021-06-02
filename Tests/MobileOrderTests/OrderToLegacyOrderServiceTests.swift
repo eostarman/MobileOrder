@@ -17,7 +17,7 @@ class OrderToLegacyOrderServiceTests: XCTestCase {
     // note that the Legacy MobileOrderLine eschews nil values (unlike the OrderLine)
     func testTheBasics() throws {
         
-        let line = OrderLine(itemNid: 101, itemName: "", packName: "", qtyOrdered: 100)
+        let line = OrderLine(itemNid: 101, qtyOrdered: 100)
         line.unitPrice = 1.23
         
         let order = Order(orderNumber: 1001, shipFromWhseNid: 1, cusNid: 2, deliveryDate: "2020-12-26", lines: [line])

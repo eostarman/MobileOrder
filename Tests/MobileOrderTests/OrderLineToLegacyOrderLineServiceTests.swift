@@ -15,7 +15,7 @@ class OrderLineToLegacyOrderLineServiceTests: XCTestCase {
     
     func testTheBasics() throws {
         
-        let line = OrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 100)
+        let line = OrderLine(itemNid: 1, qtyOrdered: 100)
         line.unitPrice = 1.23
         line.isPreferredFreeGoodLine = true
         line.basePricesAndPromosOnQtyOrdered = true
@@ -37,7 +37,7 @@ class OrderLineToLegacyOrderLineServiceTests: XCTestCase {
     
     func testOneDiscount() throws {
         
-        let line = OrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 100)
+        let line = OrderLine(itemNid: 1, qtyOrdered: 100)
         line.unitPrice = 1.23
         line.addDiscount(promoPlan: .CCFOnInvoice, promoSectionNid: 11, unitDisc: 0.15, rebateAmount: .zero)
         line.addDiscount(promoPlan: .CMAOnInvoice, promoSectionNid: 12, unitDisc: 0.16, rebateAmount: .zero)
@@ -62,7 +62,7 @@ class OrderLineToLegacyOrderLineServiceTests: XCTestCase {
     
     func testMultipleDiscounts() throws {
         
-        let line = OrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 100)
+        let line = OrderLine(itemNid: 1, qtyOrdered: 100)
         line.unitPrice = 1.23
         line.addDiscount(promoPlan: .Default, promoSectionNid: 11, unitDisc: 0.15, rebateAmount: .zero)
         line.addDiscount(promoPlan: .Stackable, promoSectionNid: 12, unitDisc: 0.16, rebateAmount: .zero)
@@ -106,7 +106,7 @@ class OrderLineToLegacyOrderLineServiceTests: XCTestCase {
     
     func testFreeGoodsMultipleDiscounts() throws {
         
-        let line = OrderLine(itemNid: 1, itemName: "1", packName: "1", qtyOrdered: 120)
+        let line = OrderLine(itemNid: 1, qtyOrdered: 120)
         line.unitPrice = 1.23
         line.addDiscount(promoPlan: .Default, promoSectionNid: 11, unitDisc: 0.15, rebateAmount: .zero)
         line.addDiscount(promoPlan: .Stackable, promoSectionNid: 12, unitDisc: 0.16, rebateAmount: .zero)

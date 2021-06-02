@@ -22,18 +22,21 @@ public class OrderLine: Identifiable, ObservableObject {
     
     public var basePricesAndPromosOnQtyOrdered: Bool = false
     
-    public var freeGoods: [LineFreeGoods] = []
-    public var discounts: [LineDiscount] = []
+    public var freeGoods: [LineItemFreeGoods] = []
+    public var discounts: [LineItemDiscount] = []
     public var charges: [LineItemCharge] = []
     public var credits: [LineItemCredit] = []
     public var potentialDiscounts: [PotentialDiscount] = []
     
     @Published public var qtyOrdered: Int
     
+    public var adjustments: [LineItemAdjustment] = []
+    
     public var qtyShipped: Int?
     public var qtyShippedOrExpectedToBeShipped: Int {
         qtyShipped ?? qtyOrdered
     }
+    
     public var unitPrice: MoneyWithoutCurrency?
     
     public var unitDiscount: MoneyWithoutCurrency {
@@ -123,11 +126,12 @@ extension OrderLine: DCOrderLine, SplitCaseChargeSource {
     
     /// The number of free goods. If the unitPrice (the frontlinePrice) is fully discounted (i.e. matches unitDiscount) then each one of the qtyShipped is free
     public var qtyFree: Int {
-        if unitPrice == unitDiscount {
-            return qtyShippedOrExpectedToBeShipped
-        } else {
-            return freeGoods.map({ $0.qtyFree}).reduce(0, +)
-        }
+        // for eoStar, this is really the free-goods generated from the buy-x-get-y-free promos
+//        if let unitPrice = unitPrice, unitPrice == unitDiscount {
+//            return qtyShippedOrExpectedToBeShipped
+//        }
+        
+        return freeGoods.map({ $0.qtyFree}).reduce(0, +)
     }
 
     public var unitNetAfterDiscount: MoneyWithoutCurrency {
@@ -153,11 +157,11 @@ extension OrderLine: DCOrderLine, SplitCaseChargeSource {
     }
     
     public func addFreeGoods(promoSectionNid: Int?, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
-        freeGoods.append(LineFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree, rebateAmount: rebateAmount))
+        freeGoods.append(LineItemFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree, rebateAmount: rebateAmount))
     }
     
     public func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int?, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
-        discounts.append(LineDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount))
+        discounts.append(LineItemDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount))
     }
     
     public func addCharge(_ charge: LineItemCharge) {
@@ -170,22 +174,6 @@ extension OrderLine: DCOrderLine, SplitCaseChargeSource {
     
     public func addPotentialDiscount(potentialDiscount: PotentialDiscount) {
         potentialDiscounts.append(potentialDiscount)
-    }
-}
-
-extension OrderLine {
-    
-    public struct LineFreeGoods {
-        public let promoSectionNid: Int?
-        public let qtyFree: Int
-        public let rebateAmount: MoneyWithoutCurrency
-    }
-    
-    public struct LineDiscount {
-        public let promoPlan: ePromoPlan
-        public let promoSectionNid: Int?
-        public let unitDisc: MoneyWithoutCurrency
-        let rebateAmount: MoneyWithoutCurrency
     }
 }
 

@@ -49,7 +49,7 @@ fileprivate extension Order {
         orderType = legacyOrder.orderType
         orderedDate = legacyOrder.orderedDate
 
-        lines = legacyOrder.lines.compactMap { line in LegacyOrderLineToOrderLineService.getOrderLine(legacyOrderLine: line) }
+        lines = legacyOrder.lines.compactMap { line in LegacyOrderLineToOrderLineService.getOrderLine(orderNumber: legacyOrder.orderNumber ?? 0, legacyOrderLine: line) }
         
         transactionCurrency = .init(currencyNid: legacyOrder.transactionCurrencyNid) ?? .USD
         orderedDate = legacyOrder.orderedDate

@@ -11,7 +11,154 @@ import MobileLegacyOrder
 import MoneyAndExchangeRates
 
 class LegacyOrderLineToOrderLineServiceTests: XCTestCase {
-
+    
+    func getRoundTripLegacyOrderLine(lol: LegacyOrderLine) -> LegacyOrderLine? {
+        guard let line = LegacyOrderLineToOrderLineService.getOrderLine(legacyOrderLine: lol) else {
+            XCTFail("Conversion failed")
+            return nil
+        }
+        
+        let lol2Lines = OrderLineToLegacyOrderLineService.getLegacyOrderLines(line)
+        
+        guard lol2Lines.count == 1, let lol2 = lol2Lines.first else {
+            XCTFail("Expected a single line")
+            return nil
+        }
+        
+        return lol2
+    }
+    
+    func assertQtyShippedAndAdjustmentsMatch(lol: LegacyOrderLine, lol2: LegacyOrderLine) {
+        
+        XCTAssertEqual(lol.qtyOrdered, lol2.qtyOrdered)
+        XCTAssertEqual(lol.itemWriteoffNid, lol2.itemWriteoffNid)
+        XCTAssertEqual(lol.wasAutoCut, lol2.wasAutoCut)
+        XCTAssertEqual(lol.qtyLayerRoundingAdjustment, lol2.qtyLayerRoundingAdjustment)
+        XCTAssertEqual(lol.qtyBackordered, lol2.qtyBackordered)
+        XCTAssertEqual(lol.qtyDeliveryDriverAdjustment, lol2.qtyDeliveryDriverAdjustment)
+        XCTAssertEqual(lol.qtyShippedWhenVoided, lol2.qtyShippedWhenVoided)
+        XCTAssertEqual(lol.qtyShipped, lol2.qtyShipped)
+    }
+    
+    func testWithNoQuantityAdjustments() throws {
+        
+        let lol = LegacyOrderLine()
+        lol.itemNid = 1001
+        lol.qtyOrdered = 100
+        lol.qtyShipped = 100
+        
+        guard let lol2 = getRoundTripLegacyOrderLine(lol: lol) else {
+            return
+        }
+        
+       assertQtyShippedAndAdjustmentsMatch(lol: lol, lol2: lol2)
+    }
+    
+    func testWithQtyShippedExceedingQtyOrdered() throws {
+        
+        let lol = LegacyOrderLine()
+        lol.itemNid = 1001
+        lol.qtyOrdered = 0
+        lol.qtyShipped = 100
+        
+        guard let lol2 = getRoundTripLegacyOrderLine(lol: lol) else {
+            return
+        }
+        
+        assertQtyShippedAndAdjustmentsMatch(lol: lol, lol2: lol2)
+    }
+    
+    func testWithQtyBackordered() throws {
+        
+        let lol = LegacyOrderLine()
+        lol.itemNid = 1001
+        lol.qtyOrdered = 100
+        lol.qtyBackordered = 30
+        lol.qtyShipped = 70
+        
+        guard let lol2 = getRoundTripLegacyOrderLine(lol: lol) else {
+            return
+        }
+        
+        assertQtyShippedAndAdjustmentsMatch(lol: lol, lol2: lol2)
+    }
+    
+    func testWithQtyCutByDriver() throws {
+        
+        let lol = LegacyOrderLine()
+        lol.itemNid = 1001
+        lol.qtyOrdered = 100
+        lol.itemWriteoffNid = 55 // the reason for cutting 30 from the order
+        lol.qtyDeliveryDriverAdjustment = -30
+        lol.qtyShipped = 70
+        
+        guard let lol2 = getRoundTripLegacyOrderLine(lol: lol) else {
+            return
+        }
+        
+        assertQtyShippedAndAdjustmentsMatch(lol: lol, lol2: lol2)
+    }
+    
+    func testWithQtyAddedByDriver() throws {
+        
+        let lol = LegacyOrderLine()
+        lol.itemNid = 1001
+        lol.qtyOrdered = 100
+        lol.qtyDeliveryDriverAdjustment = 30
+        lol.qtyShipped = 130
+        
+        guard let lol2 = getRoundTripLegacyOrderLine(lol: lol) else {
+            return
+        }
+        
+        assertQtyShippedAndAdjustmentsMatch(lol: lol, lol2: lol2)
+    }
+    
+    func testVoidedDelivery() throws {
+        
+        let lol = LegacyOrderLine()
+        lol.itemNid = 1001
+        lol.qtyOrdered = 100
+        lol.qtyShippedWhenVoided = 30
+        lol.qtyShipped = 0
+        
+        guard let lol2 = getRoundTripLegacyOrderLine(lol: lol) else {
+            return
+        }
+        
+        assertQtyShippedAndAdjustmentsMatch(lol: lol, lol2: lol2)
+    }
+    
+    func testQuantityAddedByLayerRounding() throws {
+        
+        let lol = LegacyOrderLine()
+        lol.itemNid = 1001
+        lol.qtyOrdered = 100
+        lol.qtyLayerRoundingAdjustment = 33
+        
+        guard let lol2 = getRoundTripLegacyOrderLine(lol: lol) else {
+            return
+        }
+        
+        assertQtyShippedAndAdjustmentsMatch(lol: lol, lol2: lol2)
+    }
+    
+    func testCutsByOrdersToLoads() throws {
+        
+        let lol = LegacyOrderLine()
+        lol.itemNid = 1001
+        lol.qtyOrdered = 100
+        lol.itemWriteoffNid = 55
+        lol.wasAutoCut = true
+        lol.qtyShipped = 70
+        
+        guard let lol2 = getRoundTripLegacyOrderLine(lol: lol) else {
+            return
+        }
+        
+        assertQtyShippedAndAdjustmentsMatch(lol: lol, lol2: lol2)
+    }
+    
     func testIncompleteConversionFromLegacyOrderLine() throws {
         let lol = LegacyOrderLine()
         
@@ -19,15 +166,7 @@ class LegacyOrderLineToOrderLineServiceTests: XCTestCase {
         let seedValues = SeedValues(bool: true, int: 123, money: 1.0, date: seedDate, string: "xx", nullableInt: 22, nullableMoney: 1.99, nullableDate: Date(), nullableString: "x")
         lol.seed(seedValues)
         
-        guard let line = LegacyOrderLineToOrderLineService.getOrderLine(legacyOrderLine: lol) else {
-            XCTFail("Conversion failed")
-            return
-        }
-        
-        let lol2Lines = OrderLineToLegacyOrderLineService.getLegacyOrderLines(line)
-        
-        guard lol2Lines.count == 1, let lol2 = lol2Lines.first else {
-            XCTFail("Expected a single line")
+        guard let lol2 = getRoundTripLegacyOrderLine(lol: lol) else {
             return
         }
         
@@ -85,9 +224,9 @@ class LegacyOrderLineToOrderLineServiceTests: XCTestCase {
         XCTAssertEqual(lol.noteLink, lol2.noteLink)
         XCTAssertEqual(lol.unitCRV, lol2.unitCRV)
         XCTAssertEqual(lol.seq, lol2.seq)
-
+        
     }
-
+    
 }
 
 struct SeedValues {
@@ -159,6 +298,6 @@ fileprivate extension LegacyOrderLine {
         noteLink = v.nullableInt
         unitCRV = v.money
         seq = v.int
-
+        
     }
 }
