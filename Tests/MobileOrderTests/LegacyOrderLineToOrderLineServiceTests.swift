@@ -13,7 +13,7 @@ import MoneyAndExchangeRates
 class LegacyOrderLineToOrderLineServiceTests: XCTestCase {
     
     func getRoundTripLegacyOrderLine(lol: LegacyOrderLine) -> LegacyOrderLine? {
-        guard let line = LegacyOrderLineToOrderLineService.getOrderLine(legacyOrderLine: lol) else {
+        guard let line = LegacyOrderLineToOrderLineService.getOrderLine(orderNumber: 9999, legacyOrderLine: lol) else {
             XCTFail("Conversion failed")
             return nil
         }

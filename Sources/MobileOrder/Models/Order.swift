@@ -85,78 +85,13 @@ public class Order: Identifiable, ObservableObject {
         
         recompute()
     }
-}
-
-// calculations on the order
-extension Order {
-
+    
     public func recompute() {
-        
-        objectWillChange.send()
-        
-        let filteredLines = lines.filter { $0.qtyOrdered >= 0 }
-            
-        if filteredLines.isEmpty {
-            unusedFreebies = []
-        } else {
-            computePrices(filteredLines: filteredLines)
-            unusedFreebies = computeDiscounts(filteredLines: filteredLines)
-            computeSplitCaseCharges(filteredLines: filteredLines)
-            computeDeposits(filteredLines: filteredLines)
-        }
-        
-        totalAfterSavings = lines.reduce(MoneyWithoutCurrency.zero) { $0 + $1.totalAfterSavings }.withCurrency(transactionCurrency)
-        totalSavings = lines.reduce(MoneyWithoutCurrency.zero, { $0 + $1.totalSavings }).withCurrency(transactionCurrency)
-        qtyFree = lines.reduce(0) { $0 + $1.qtyFree }
-    }
-    
-    private func getTotalAfterSavings() -> Money {
-        let total = lines.reduce(MoneyWithoutCurrency.zero) { $0 + $1.totalAfterSavings }
-        return total.withCurrency(transactionCurrency)
-    }
-    
-    private func getTotalSavings() -> Money {
-        let total = lines.reduce(MoneyWithoutCurrency.zero) { $0 + $1.totalSavings }
-        return total.withCurrency(transactionCurrency)
-    }
-
-    private func computePrices(filteredLines: [OrderLine]) {
-        
-        let shipFrom = mobileDownload.warehouses[shipFromWhseNid]
-        let sellTo = mobileDownload.customers[cusNid]
-
-        let priceService = FrontlinePriceService(shipFrom: shipFrom, sellTo: sellTo, pricingDate: promoDate, transactionCurrency: transactionCurrency, numberOfDecimals: numberOfDecimals)
-
-        for saleLine in filteredLines {
-            let item = mobileDownload.items[saleLine.itemNid]
-            saleLine.unitPrice = priceService.getPrice(item)?.withoutCurrency()
-        }
-    }
-    
-    private func computeDiscounts(filteredLines: [OrderLine]) -> [UnusedFreebie] {
-        
-        let promoSections = PromoService.getPromoSectionRecords(cusNid: cusNid, promoDate: promoDate, deliveryDate: deliveryDate)
-        
-        let calc = PromoService(transactionCurrency: transactionCurrency, promoSections: promoSections, promoDate: promoDate)
-        
-        let promoSolution = calc.computeDiscounts(dcOrderLines: filteredLines)
-        
-        return promoSolution.unusedFreebies
-    }
-    
-    private func computeSplitCaseCharges(filteredLines: [OrderLine]) {
-        SplitCaseChargeService.computeSplitCaseCharges(deliveryDate: deliveryDate, transactionCurrency: transactionCurrency, orderLines: filteredLines)
-    }
-    
-    private func computeDeposits(filteredLines: [OrderLine]) {
-        let shipFrom = mobileDownload.warehouses[shipFromWhseNid]
-        let sellTo = mobileDownload.customers[cusNid]
-        
-        let depositService = DepositService(shipFrom: shipFrom, sellTo: sellTo, pricingDate: promoDate, transactionCurrency: transactionCurrency, numberOfDecimals: numberOfDecimals)
-        
-        depositService.applyDeposits(orderLines: filteredLines)
+        let recomputeService = OrderRecomputeService(order: self)
+        recomputeService.recompute()
     }
 }
+
 
 // populate order lines based on history
 extension Order {

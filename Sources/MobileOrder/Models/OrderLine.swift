@@ -70,7 +70,7 @@ public class OrderLine: Identifiable, ObservableObject {
     }
 }
 
-extension OrderLine: DCOrderLine, SplitCaseChargeSource {
+extension OrderLine {
     public var qtyDiscounted: Int {
         discounts.isEmpty ? 0 : qtyShippedOrExpectedToBeShipped - qtyFree
     }
@@ -140,22 +140,7 @@ extension OrderLine: DCOrderLine, SplitCaseChargeSource {
         }
         return .zero
     }
-    
-    public func getCokePromoTotal() -> MoneyWithoutCurrency {
-        discounts.filter({ $0.promoPlan.isCokePromo }).map({ $0.unitDisc }).reduce(.zero, +)
-    }
-    
-    public func clearAllPromoData() {
-        
-        objectWillChange.send() // so SwiftUI will re-render any views observing this particular orderLine
-        
-        freeGoods = []
-        discounts = []
-        charges = []
-        credits = []
-        potentialDiscounts = []
-    }
-    
+
     public func addFreeGoods(promoSectionNid: Int?, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
         freeGoods.append(LineItemFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree, rebateAmount: rebateAmount))
     }
@@ -170,10 +155,6 @@ extension OrderLine: DCOrderLine, SplitCaseChargeSource {
     
     public func addCredit(_ credit: LineItemCredit) {
         credits.append(credit)
-    }
-    
-    public func addPotentialDiscount(potentialDiscount: PotentialDiscount) {
-        potentialDiscounts.append(potentialDiscount)
     }
 }
 
