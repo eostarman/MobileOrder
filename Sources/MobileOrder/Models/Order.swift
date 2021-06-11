@@ -58,6 +58,14 @@ public class Order: Identifiable, ObservableObject {
     public var deliveryInfo: OrderDeliveryInfo = .init()
     public var deliveryRouteInfo: OrderDeliveryRouteInfo = .init()
     public var paymentTermsInfo: OrderPaymentTermsInfo = .init()
+    
+    /// Number of items (excluding billing codes, but including dunnage)
+    public var numberOfItems: Int {
+        let nonZeroLines = lines.filter({ $0.qtyShippedOrExpectedToBeShipped > 0 })
+        let nonBillingCodes = nonZeroLines.filter { !mobileDownload.items[$0.itemNid].isBillingCode }
+        let totalQty = nonBillingCodes.reduce(0, {$0 + $1.qtyShippedOrExpectedToBeShipped})
+        return totalQty
+    }
 
     public init(orderNumber: Int?, shipFromWhseNid: Int, cusNid: Int, deliveryDate: Date, lines: [OrderLine]) {
         self.orderNumber = orderNumber
@@ -106,6 +114,10 @@ extension Order {
         case allLines
         case discounts
         case potentialDiscounts
+    }
+    
+    public func getFilteredOrderLines(lines: [OrderLine], searchText: String) -> [OrderLine] {
+        searchText.isEmpty ? lines : lines.filter { mobileDownload.items[$0.itemNid].recName.localizedCaseInsensitiveContains(searchText) }
     }
     
     public func getFilteredOrderLines(filter: OrderLineFilter) -> [OrderLine] {

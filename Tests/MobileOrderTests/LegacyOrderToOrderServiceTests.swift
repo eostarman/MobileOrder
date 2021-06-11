@@ -13,6 +13,7 @@ import MoneyAndExchangeRates
 class LegacyOrderToOrderServiceTests: XCTestCase {
 
     func testIncompleteConversionFromLegacyOrder() throws {
+        
         let lol = LegacyOrder()
         
         let seedDate = Date.fromDownloadedDateTime("20200529:200545")! // don't use Date() since it'll have millisecs and we don't encode/decode millisecs
