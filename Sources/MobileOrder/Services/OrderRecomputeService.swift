@@ -31,7 +31,6 @@ struct OrderRecomputeService {
         shipFromWhseNid = order.shipFromWhseNid
         cusNid = order.cusNid
         orderLines = order.lines.filter({ $0.qtyOrdered >= 0 })
-        print("initialize service")
     }
     
     public func recompute() {
@@ -56,7 +55,7 @@ struct OrderRecomputeService {
                 apply(to: change.0, from: change.1)
             }
             
-            print("DEBUG: \(order.lines.count) numberOfLines=\(orderLines.count) numberOfChanges=\(changes.count)")
+            //print("DEBUG: \(order.lines.count) numberOfLines=\(orderLines.count) numberOfChanges=\(changes.count)")
         }
         
         order.objectWillChange.send()

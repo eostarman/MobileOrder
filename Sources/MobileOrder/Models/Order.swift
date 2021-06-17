@@ -157,12 +157,11 @@ extension Order {
         
         switch creationFilter {
         case .officeList:
-            let officeListService = OfficeListService(cusNid: cusNid)
-            items = officeListService.itemNids.map { mobileDownload.items[$0] }            
+            items = PresellOrderService.itemsInCustomerOfficeList(cusNid: cusNid)
         case .allHistory:
-            items = getItemsFromAllHistory(cusNid: cusNid)
+            items = PresellOrderService.itemsInCustomerHistory(cusNid: cusNid)
         case .allItems:
-            items = mobileDownload.items.getAll().filter({ $0.activeFlag && $0.canSell })
+            items = PresellOrderService.itemsListedAsCanSellInMobileDownload()
         }
         
         items = items.sorted(by: { $0.recName < $1.recName })
@@ -178,18 +177,6 @@ extension Order {
         let lines = sellableItems.map { item in  OrderLine(itemNid: item.recNid, qtyOrdered: 0) }
         
         return lines
-    }
-    
-    private static func getItemsFromAllHistory(cusNid: Int) -> [ItemRecord] {
-      
-        let customer = mobileDownload.customers[cusNid]
-        let sales = mobileDownload.customers.getCustomerSales(customer)
-
-        let itemNids = sales.map { $0.itemNid }.unique()
-
-        let items = itemNids.map { mobileDownload.items[$0] }
-
-        return items
     }
 }
 
