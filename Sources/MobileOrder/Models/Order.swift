@@ -74,6 +74,8 @@ public class Order: Identifiable, ObservableObject {
         self.deliveryDate = deliveryDate
         self.lines = lines
         
+        self.slsEmpNid = mobileDownload.loggedInEmpNid
+        
         transactionCurrency = mobileDownload.customers[cusNid].transactionCurrency
         numberOfDecimals = mobileDownload.handheld.nbrPriceDecimals
 

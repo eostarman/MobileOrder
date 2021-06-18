@@ -21,6 +21,12 @@ public struct OrderToLegacyOrderService {
 fileprivate extension LegacyOrder {
     
     func convertFromOrder(order: Order) {
+        
+        //hack: these should be in the new Order object
+        entryTime = Date()
+        enteredDate = entryTime
+        enteredByNid = order.slsEmpNid
+        
 
         orderNumber = order.orderNumber
         transactionCurrencyNid = order.transactionCurrency.currencyNid
